@@ -48,6 +48,63 @@
             opacity: 0.9;
         }
 
+        .user-controls {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .user-id-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .user-id-input {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .user-id-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .connection-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .connection-status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .connection-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .connection-status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .controls {
             padding: 30px;
             border-bottom: 1px solid #e0e0e0;
@@ -84,6 +141,12 @@
             transform: translateY(0);
         }
 
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-delete {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
@@ -114,7 +177,7 @@
         .table-container {
             overflow-x: auto;
             padding: 0 30px 30px;
-            max-height: calc(100vh - 300px);
+            max-height: calc(100vh - 400px);
             overflow-y: auto;
         }
 
@@ -314,6 +377,12 @@
                 font-size: 2rem;
             }
 
+            .user-controls {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
             .controls {
                 padding: 20px;
                 gap: 10px;
@@ -321,38 +390,7 @@
 
             .table-container {
                 padding: 0 20px 20px;
-                max-height: calc(100vh - 250px);
-            }
-
-            th,
-            td {
-                padding: 12px 8px;
-                font-size: 13px;
-            }
-
-            .job-number {
-                width: 70px;
-                max-width: 70px;
-            }
-
-            .task-name {
-                min-width: 180px;
-                max-width: 250px;
-            }
-
-            .estimate-col,
-            .filled-col,
-            .remaining-col {
-                width: 85px;
-            }
-
-            .done-col {
-                width: 70px;
-            }
-
-            .btn {
-                padding: 10px 18px;
-                font-size: 13px;
+                max-height: calc(100vh - 350px);
             }
         }
 
@@ -375,64 +413,7 @@
 
             .table-container {
                 padding: 0 15px 15px;
-                max-height: calc(100vh - 280px);
-            }
-
-            th,
-            td {
-                padding: 10px 6px;
-                font-size: 12px;
-            }
-
-            .job-number {
-                width: 60px;
-                max-width: 60px;
-            }
-
-            .task-name {
-                min-width: 140px;
-                max-width: 180px;
-            }
-
-            .estimate-col,
-            .filled-col,
-            .remaining-col {
-                width: 75px;
-            }
-
-            .done-col {
-                width: 65px;
-            }
-
-            .actions-col {
-                width: 50px;
-            }
-
-            .delete-row {
-                width: 26px;
-                height: 26px;
-                font-size: 14px;
-            }
-
-            input[type="text"],
-            input[type="number"],
-            select {
-                padding: 8px 10px;
-                font-size: 12px;
-            }
-
-            input[type="checkbox"] {
-                width: 18px;
-                height: 18px;
-                transform: scale(1.1);
-            }
-
-            .progress-bar {
-                height: 4px;
-            }
-
-            .remaining-hours {
-                font-size: 10px;
+                max-height: calc(100vh - 380px);
             }
         }
     </style>
@@ -442,34 +423,41 @@
     <div class="container">
         <div class="header">
             <h1>Task Management System</h1>
-            <p>Organize, track, and complete your projects efficiently</p>
+            <p>Organize, track, and complete your projects efficiently - Now with cloud sync!</p>
+        </div>
+
+        <div class="user-controls">
+            <div class="user-id-section">
+                <label for="userId">User ID:</label>
+                <input type="text" id="userId" class="user-id-input" placeholder="Enter your unique ID..." 
+                       onchange="changeUser()" maxlength="50">
+                <button class="btn" onclick="generateUserId()">🎲 Generate ID</button>
+            </div>
+            <div class="connection-status loading" id="connectionStatus">
+                🔄 Connecting to cloud...
+            </div>
         </div>
 
         <div class="controls">
-            <button class="btn" onclick="addRow()">+ Add Task</button>
-            <button class="btn" onclick="saveData()">💾 Save</button>
+            <button class="btn" onclick="addRow()" id="addBtn">+ Add Task</button>
+            <button class="btn" onclick="saveToCloud()" id="saveBtn">☁️ Save to Cloud</button>
+            <button class="btn" onclick="loadFromCloud()" id="loadBtn">📥 Load from Cloud</button>
             <button class="btn" onclick="exportToJSON()">📥 Export JSON</button>
             <button class="btn" onclick="document.getElementById('importFile').click()">📤 Import JSON</button>
             <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importFromJSON(event)">
-            <div class="save-status saved" id="saveStatus">All changes saved</div>
+            <div class="save-status saved" id="saveStatus">Ready</div>
         </div>
 
         <div class="table-container">
             <table id="taskTable">
                 <thead>
                     <tr>
-                        <th class="job-number" data-column="job">Job #<div class="resize-handle"></div>
-                        </th>
-                        <th class="task-name" data-column="task">Task Name<div class="resize-handle"></div>
-                        </th>
-                        <th class="estimate-col" data-column="estimate">Estimate (h)<div class="resize-handle"></div>
-                        </th>
-                        <th class="filled-col" data-column="filled">Filled (h)<div class="resize-handle"></div>
-                        </th>
-                        <th class="remaining-col" data-column="remaining">Remaining<div class="resize-handle"></div>
-                        </th>
-                        <th class="done-col" data-column="done">Done<div class="resize-handle"></div>
-                        </th>
+                        <th class="job-number" data-column="job">Job #<div class="resize-handle"></div></th>
+                        <th class="task-name" data-column="task">Task Name<div class="resize-handle"></div></th>
+                        <th class="estimate-col" data-column="estimate">Estimate (h)<div class="resize-handle"></div></th>
+                        <th class="filled-col" data-column="filled">Filled (h)<div class="resize-handle"></div></th>
+                        <th class="remaining-col" data-column="remaining">Remaining<div class="resize-handle"></div></th>
+                        <th class="done-col" data-column="done">Done<div class="resize-handle"></div></th>
                         <th class="actions-col">Action</th>
                     </tr>
                 </thead>
@@ -479,7 +467,36 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+
     <script>
+        // Firebase configuration - REPLACE WITH YOUR CONFIG
+        const firebaseConfig = {
+            // Paste your Firebase config here from Step 3
+            apiKey: "AIzaSyAAp2F-8zpv8svX3cdshHVvzDWyDzkWPuM",
+    authDomain: "task-manager-personal-f543e.firebaseapp.com",
+    projectId: "task-manager-personal-f543e",
+    storageBucket: "task-manager-personal-f543e.firebasestorage.app",
+    messagingSenderId: "439010018138",
+    appId: "1:439010018138:web:e497a23cae97bc77e52963"
+        };
+
+        // Initialize Firebase
+        let db;
+        let isCloudEnabled = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            isCloudEnabled = true;
+            updateConnectionStatus('connected', '✅ Cloud connected');
+        } catch (error) {
+            console.warn('Firebase initialization failed, using localStorage only:', error);
+            updateConnectionStatus('disconnected', '❌ Cloud unavailable - Using local storage');
+        }
+
         let taskData = [];
         let autoSaveTimeout;
         let taskIdCounter = 1;
@@ -487,11 +504,196 @@
         let currentResizeColumn = null;
         let startX = 0;
         let startWidth = 0;
+        let currentUserId = '';
+
+        function updateConnectionStatus(status, message) {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.className = `connection-status ${status}`;
+            statusEl.textContent = message;
+            
+            // Enable/disable cloud buttons
+            const cloudButtons = ['saveBtn', 'loadBtn'];
+            cloudButtons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = !isCloudEnabled;
+                }
+            });
+        }
+
+        function generateUserId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 12; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('userId').value = result;
+            changeUser();
+        }
+
+        function changeUser() {
+            const userId = document.getElementById('userId').value.trim();
+            if (userId && userId !== currentUserId) {
+                currentUserId = userId;
+                localStorage.setItem('taskManagerUserId', userId);
+                loadFromCloud();
+            }
+        }
+
+        async function saveToCloud() {
+            if (!isCloudEnabled || !currentUserId) {
+                alert('Please enter a User ID and ensure cloud connection is available!');
+                return;
+            }
+
+            try {
+                showSaveStatus('saving');
+                const dataToSave = {
+                    tasks: taskData,
+                    counter: taskIdCounter,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                    userId: currentUserId
+                };
+
+                await db.collection('taskData').doc(currentUserId).set(dataToSave);
+                showSaveStatus('saved');
+                console.log('Data saved to cloud successfully');
+            } catch (error) {
+                console.error('Error saving to cloud:', error);
+                showSaveStatus('error');
+                alert('Error saving to cloud. Data saved locally instead.');
+                saveDataLocally();
+            }
+        }
+
+        async function loadFromCloud() {
+            if (!isCloudEnabled || !currentUserId) {
+                loadDataLocally();
+                return;
+            }
+
+            try {
+                showSaveStatus('loading');
+                const doc = await db.collection('taskData').doc(currentUserId).get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    taskData = data.tasks || [];
+                    taskIdCounter = data.counter || 1;
+                    renderTable();
+                    showSaveStatus('loaded');
+                    console.log('Data loaded from cloud successfully');
+                } else {
+                    console.log('No cloud data found for this user, starting fresh');
+                    taskData = [];
+                    taskIdCounter = 1;
+                    renderTable();
+                    showSaveStatus('saved');
+                }
+            } catch (error) {
+                console.error('Error loading from cloud:', error);
+                showSaveStatus('error');
+                loadDataLocally();
+            }
+        }
+
+        function autoSaveToCloud() {
+            if (!isCloudEnabled || !currentUserId) {
+                autoSaveLocally();
+                return;
+            }
+
+            clearTimeout(autoSaveTimeout);
+            showSaveStatus('saving');
+            autoSaveTimeout = setTimeout(async () => {
+                try {
+                    const dataToSave = {
+                        tasks: taskData,
+                        counter: taskIdCounter,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                        userId: currentUserId
+                    };
+
+                    await db.collection('taskData').doc(currentUserId).set(dataToSave);
+                    showSaveStatus('saved');
+                } catch (error) {
+                    console.error('Auto-save to cloud failed:', error);
+                    saveDataLocally();
+                    showSaveStatus('saved');
+                }
+            }, 2000);
+        }
+
+        function saveDataLocally() {
+            try {
+                const dataToSave = {
+                    tasks: taskData,
+                    counter: taskIdCounter,
+                    savedAt: new Date().toISOString(),
+                    userId: currentUserId
+                };
+                localStorage.setItem('taskManagerData', JSON.stringify(dataToSave));
+            } catch (e) {
+                console.error('Error saving locally:', e);
+            }
+        }
+
+        function loadDataLocally() {
+            const saved = localStorage.getItem('taskManagerData');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    taskData = parsed.tasks || [];
+                    taskIdCounter = parsed.counter || 1;
+                } catch (e) {
+                    console.error('Error loading local data:', e);
+                    taskData = [];
+                }
+            }
+            renderTable();
+        }
+
+        function autoSaveLocally() {
+            clearTimeout(autoSaveTimeout);
+            showSaveStatus('saving');
+            autoSaveTimeout = setTimeout(() => {
+                saveDataLocally();
+                showSaveStatus('saved');
+            }, 1000);
+        }
+
+        function showSaveStatus(status) {
+            const statusEl = document.getElementById('saveStatus');
+            statusEl.className = 'save-status';
+
+            switch (status) {
+                case 'saved':
+                    statusEl.classList.add('saved');
+                    statusEl.textContent = '✅ Saved to cloud';
+                    break;
+                case 'saving':
+                    statusEl.classList.add('saving');
+                    statusEl.textContent = '⏳ Saving to cloud...';
+                    break;
+                case 'loading':
+                    statusEl.classList.add('saving');
+                    statusEl.textContent = '⏳ Loading from cloud...';
+                    break;
+                case 'loaded':
+                    statusEl.classList.add('saved');
+                    statusEl.textContent = '✅ Loaded from cloud';
+                    break;
+                case 'error':
+                    statusEl.style.background = '#f8d7da';
+                    statusEl.style.color = '#721c24';
+                    statusEl.textContent = '❌ Cloud error';
+                    break;
+            }
+        }
 
         // Column resize functionality
         function initializeColumnResize() {
             const resizeHandles = document.querySelectorAll('.resize-handle');
-
             resizeHandles.forEach(handle => {
                 handle.addEventListener('mousedown', startResize);
             });
@@ -514,17 +716,14 @@
 
         function doResize(e) {
             if (!isResizing) return;
-
             const diff = e.clientX - startX;
-            const newWidth = Math.max(50, startWidth + diff); // Minimum width 50px
-
+            const newWidth = Math.max(50, startWidth + diff);
             currentResizeColumn.style.width = newWidth + 'px';
             currentResizeColumn.style.minWidth = newWidth + 'px';
         }
 
         function stopResize() {
             if (!isResizing) return;
-
             isResizing = false;
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
@@ -538,73 +737,27 @@
             document.removeEventListener('mouseup', stopResize);
         }
 
-        // Load data on page load
+        // Initialize on page load
         window.addEventListener('load', function () {
-            loadData();
+            // Load saved user ID
+            const savedUserId = localStorage.getItem('taskManagerUserId');
+            if (savedUserId) {
+                document.getElementById('userId').value = savedUserId;
+                currentUserId = savedUserId;
+            }
+
+            // Load data
+            if (currentUserId && isCloudEnabled) {
+                loadFromCloud();
+            } else {
+                loadDataLocally();
+            }
+
             if (taskData.length === 0) {
-                addRow(); // Add initial row if no data exists
+                addRow();
             }
             initializeColumnResize();
         });
-
-        function loadData() {
-            const saved = localStorage.getItem('taskManagerData');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    taskData = parsed.tasks || [];
-                    taskIdCounter = parsed.counter || 1;
-                } catch (e) {
-                    console.error('Error loading saved data:', e);
-                    taskData = [];
-                }
-            }
-            renderTable();
-        }
-
-        function saveData() {
-            try {
-                const dataToSave = {
-                    tasks: taskData,
-                    counter: taskIdCounter,
-                    savedAt: new Date().toISOString()
-                };
-                localStorage.setItem('taskManagerData', JSON.stringify(dataToSave));
-                showSaveStatus('saved');
-            } catch (e) {
-                console.error('Error saving data:', e);
-                showSaveStatus('error');
-            }
-        }
-
-        function autoSave() {
-            clearTimeout(autoSaveTimeout);
-            showSaveStatus('saving');
-            autoSaveTimeout = setTimeout(() => {
-                saveData();
-            }, 1000);
-        }
-
-        function showSaveStatus(status) {
-            const statusEl = document.getElementById('saveStatus');
-            statusEl.className = 'save-status';
-
-            switch (status) {
-                case 'saved':
-                    statusEl.classList.add('saved');
-                    statusEl.textContent = '✓ All changes saved';
-                    break;
-                case 'saving':
-                    statusEl.classList.add('saving');
-                    statusEl.textContent = '⏳ Saving...';
-                    break;
-                case 'error':
-                    statusEl.style.background = '#f8d7da';
-                    statusEl.style.color = '#721c24';
-                    statusEl.textContent = '❌ Error saving';
-                    break;
-            }
-        }
 
         function addRow() {
             const newTask = {
@@ -617,13 +770,13 @@
             };
             taskData.push(newTask);
             renderTable();
-            autoSave();
+            autoSaveToCloud();
         }
 
         function deleteRow(id) {
             taskData = taskData.filter(task => task.id !== id);
             renderTable();
-            autoSave();
+            autoSaveToCloud();
         }
 
         function updateTask(id, field, value) {
@@ -637,13 +790,12 @@
                     task[field] = value;
                 }
                 renderTable();
-                autoSave();
+                autoSaveToCloud();
             }
         }
 
         function calculateRemaining(estimate, filled) {
-            const remaining = Math.max(0, estimate - filled);
-            return remaining;
+            return Math.max(0, estimate - filled);
         }
 
         function calculateProgress(estimate, filled) {
@@ -665,8 +817,7 @@
                     <td class="job-number">
                         <input type="text" value="${task.jobNumber}" 
                                onchange="updateTask(${task.id}, 'jobNumber', this.value)"
-                               placeholder="#"
-                               maxlength="10">
+                               placeholder="#" maxlength="10">
                     </td>
                     <td class="task-name">
                         <input type="text" value="${task.taskName}" 
@@ -710,14 +861,15 @@
             });
         }
 
-        // Export data to JSON file
+        // Export/Import JSON functions
         function exportToJSON() {
             try {
                 const dataToExport = {
                     tasks: taskData,
                     counter: taskIdCounter,
+                    userId: currentUserId,
                     exportedAt: new Date().toISOString(),
-                    version: "1.0"
+                    version: "2.0"
                 };
 
                 const jsonString = JSON.stringify(dataToExport, null, 2);
@@ -728,21 +880,18 @@
                 a.href = url;
                 const now = new Date();
                 const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`;
-                a.download = `tasks_${timestamp}.json`;
+                a.download = `tasks_${currentUserId || 'backup'}_${timestamp}.json`;
 
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-
-                showSaveStatus('exported');
             } catch (e) {
                 console.error('Error exporting data:', e);
-                alert('Lỗi khi export dữ liệu!');
+                alert('Error exporting data!');
             }
         }
 
-        // Import data from JSON file
         function importFromJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -752,50 +901,9 @@
                 try {
                     const importedData = JSON.parse(e.target.result);
 
-                    // Validate data structure
                     if (importedData.tasks && Array.isArray(importedData.tasks)) {
-                        if (confirm('Bạn có chắc muốn thay thế tất cả dữ liệu hiện tại?')) {
+                        if (confirm('Replace all current data with imported data?')) {
                             taskData = importedData.tasks;
                             taskIdCounter = importedData.counter || taskData.length + 1;
-                            renderTable();
-                            saveData(); // Save to localStorage as well
-                            showSaveStatus('imported');
-                        }
-                    } else {
-                        alert('File JSON không đúng định dạng!');
-                    }
-                } catch (e) {
-                    console.error('Error importing data:', e);
-                    alert('Lỗi khi đọc file JSON!');
-                }
-            };
-            reader.readAsText(file);
-
-            // Reset input
-            event.target.value = '';
-        }
-
-        // Auto export when data changes (optional)
-        function autoExportToJSON() {
-            if (taskData.length > 0) {
-                const dataToExport = {
-                    tasks: taskData,
-                    counter: taskIdCounter,
-                    lastUpdated: new Date().toISOString(),
-                    version: "1.0"
-                };
-
-                // Create downloadable link without auto-download
-                const jsonString = JSON.stringify(dataToExport, null, 2);
-                localStorage.setItem('taskManagerJSON', jsonString);
-            }
-        }
-
-        // Auto-save when user leaves the page
-        window.addEventListener('beforeunload', function () {
-            saveData();
-        });
-    </script>
-</body>
-
-</html>
+                            
+                            if (importedData.userI
