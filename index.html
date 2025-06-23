@@ -429,8 +429,8 @@
         <div class="user-controls">
             <div class="user-id-section">
                 <label for="userId">User ID:</label>
-                <input type="text" id="userId" class="user-id-input" placeholder="Enter your unique ID..." 
-                       onchange="changeUser()" maxlength="50">
+                <input type="text" id="userId" class="user-id-input" placeholder="Enter your unique ID..."
+                    onchange="changeUser()" maxlength="50">
                 <button class="btn" onclick="generateUserId()">🎲 Generate ID</button>
             </div>
             <div class="connection-status loading" id="connectionStatus">
@@ -442,9 +442,6 @@
             <button class="btn" onclick="addRow()" id="addBtn">+ Add Task</button>
             <button class="btn" onclick="saveToCloud()" id="saveBtn">☁️ Save to Cloud</button>
             <button class="btn" onclick="loadFromCloud()" id="loadBtn">📥 Load from Cloud</button>
-            <button class="btn" onclick="exportToJSON()">📥 Export JSON</button>
-            <button class="btn" onclick="document.getElementById('importFile').click()">📤 Import JSON</button>
-            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importFromJSON(event)">
             <div class="save-status saved" id="saveStatus">Ready</div>
         </div>
 
@@ -452,12 +449,18 @@
             <table id="taskTable">
                 <thead>
                     <tr>
-                        <th class="job-number" data-column="job">Job #<div class="resize-handle"></div></th>
-                        <th class="task-name" data-column="task">Task Name<div class="resize-handle"></div></th>
-                        <th class="estimate-col" data-column="estimate">Estimate (h)<div class="resize-handle"></div></th>
-                        <th class="filled-col" data-column="filled">Filled (h)<div class="resize-handle"></div></th>
-                        <th class="remaining-col" data-column="remaining">Remaining<div class="resize-handle"></div></th>
-                        <th class="done-col" data-column="done">Done<div class="resize-handle"></div></th>
+                        <th class="job-number" data-column="job">Job #<div class="resize-handle"></div>
+                        </th>
+                        <th class="task-name" data-column="task">Task Name<div class="resize-handle"></div>
+                        </th>
+                        <th class="estimate-col" data-column="estimate">Estimate (h)<div class="resize-handle"></div>
+                        </th>
+                        <th class="filled-col" data-column="filled">Filled (h)<div class="resize-handle"></div>
+                        </th>
+                        <th class="remaining-col" data-column="remaining">Remaining<div class="resize-handle"></div>
+                        </th>
+                        <th class="done-col" data-column="done">Done<div class="resize-handle"></div>
+                        </th>
                         <th class="actions-col">Action</th>
                     </tr>
                 </thead>
@@ -476,11 +479,11 @@
         const firebaseConfig = {
             // Paste your Firebase config here from Step 3
             apiKey: "AIzaSyAAp2F-8zpv8svX3cdshHVvzDWyDzkWPuM",
-    authDomain: "task-manager-personal-f543e.firebaseapp.com",
-    projectId: "task-manager-personal-f543e",
-    storageBucket: "task-manager-personal-f543e.firebasestorage.app",
-    messagingSenderId: "439010018138",
-    appId: "1:439010018138:web:e497a23cae97bc77e52963"
+            authDomain: "task-manager-personal-f543e.firebaseapp.com",
+            projectId: "task-manager-personal-f543e",
+            storageBucket: "task-manager-personal-f543e.firebasestorage.app",
+            messagingSenderId: "439010018138",
+            appId: "1:439010018138:web:e497a23cae97bc77e52963"
         };
 
         // Initialize Firebase
@@ -510,7 +513,7 @@
             const statusEl = document.getElementById('connectionStatus');
             statusEl.className = `connection-status ${status}`;
             statusEl.textContent = message;
-            
+
             // Enable/disable cloud buttons
             const cloudButtons = ['saveBtn', 'loadBtn'];
             cloudButtons.forEach(id => {
@@ -575,7 +578,7 @@
             try {
                 showSaveStatus('loading');
                 const doc = await db.collection('taskData').doc(currentUserId).get();
-                
+
                 if (doc.exists) {
                     const data = doc.data();
                     taskData = data.tasks || [];
@@ -860,50 +863,7 @@
                 tbody.appendChild(row);
             });
         }
+    </script>
+</body>
 
-        // Export/Import JSON functions
-        function exportToJSON() {
-            try {
-                const dataToExport = {
-                    tasks: taskData,
-                    counter: taskIdCounter,
-                    userId: currentUserId,
-                    exportedAt: new Date().toISOString(),
-                    version: "2.0"
-                };
-
-                const jsonString = JSON.stringify(dataToExport, null, 2);
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-
-                const a = document.createElement('a');
-                a.href = url;
-                const now = new Date();
-                const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`;
-                a.download = `tasks_${currentUserId || 'backup'}_${timestamp}.json`;
-
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            } catch (e) {
-                console.error('Error exporting data:', e);
-                alert('Error exporting data!');
-            }
-        }
-
-        function importFromJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-
-                    if (importedData.tasks && Array.isArray(importedData.tasks)) {
-                        if (confirm('Replace all current data with imported data?')) {
-                            taskData = importedData.tasks;
-                            taskIdCounter = importedData.counter || taskData.length + 1;
-                            
-                            if (importedData.userI
+</html>
