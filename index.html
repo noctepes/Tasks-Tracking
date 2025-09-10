@@ -51,7 +51,7 @@
             opacity: 0.9;
         }
 
-        .user-controls {
+        .account-controls {
             padding: 20px 30px;
             border-bottom: 1px solid #e0e0e0;
             background: rgba(255, 255, 255, 0.95);
@@ -61,14 +61,14 @@
             flex-wrap: wrap;
         }
 
-        .user-id-section {
+        .account-section {
             display: flex;
             align-items: center;
             gap: 10px;
             flex: 1;
         }
 
-        .user-id-input {
+        .account-input {
             padding: 10px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 25px;
@@ -77,7 +77,7 @@
             transition: all 0.3s ease;
         }
 
-        .user-id-input:focus {
+        .account-input:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -149,6 +149,15 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-export:hover {
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
         }
 
         .btn-delete {
@@ -275,7 +284,6 @@
             width: 20px;
             height: 20px;
             cursor: pointer;
-            /* Fallback for browsers not supporting accent-color */
             background-color: #667eea;
             border: 2px solid #667eea;
             accent-color: #667eea;
@@ -366,6 +374,43 @@
             margin-top: 2px;
         }
 
+        .export-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .export-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 150px;
+        }
+
+        .export-menu.show {
+            display: block;
+        }
+
+        .export-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .export-option:last-child {
+            border-bottom: none;
+        }
+
+        .export-option:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
         @media (max-width: 1080px) {
             .container {
                 margin: 0;
@@ -385,7 +430,7 @@
                 font-size: 2rem;
             }
 
-            .user-controls {
+            .account-controls {
                 padding: 15px 20px;
                 flex-direction: column;
                 align-items: stretch;
@@ -440,6 +485,18 @@
             width: 80%;
             max-width: 700px;
         }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 20px;
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 500;
+        }
     </style>
 </head>
 
@@ -447,15 +504,15 @@
     <div class="container">
         <div class="header">
             <h1>Task Management System</h1>
-            <p>Organize, track, and complete your projects efficiently - Now with cloud sync!</p>
+            <p>Organize, track, and complete your projects efficiently - Personal Account</p>
         </div>
 
-        <div class="user-controls">
-            <div class="user-id-section">
-                <label for="userId">User ID:</label>
-                <input type="text" id="userId" class="user-id-input" placeholder="Enter your unique ID..."
-                    onchange="changeUser()" maxlength="50">
-                <button class="btn" onclick="generateUserId()">🎲 Generate ID</button>
+        <div class="account-controls">
+            <div class="account-section">
+                <label for="accountName">Account Name:</label>
+                <input type="text" id="accountName" class="account-input" placeholder="Enter account name..."
+                    onchange="changeAccount()" maxlength="50">
+                <button class="btn" onclick="createAccount()">✨ Create Account</button>
             </div>
             <div class="connection-status loading" id="connectionStatus">
                 🔄 Connecting to cloud...
@@ -467,6 +524,17 @@
             <button class="btn" onclick="toggleCalculator()">🧮 Calculator</button>
             <button class="btn" onclick="saveToCloud()" id="saveBtn">☁️ Save to Cloud</button>
             <button class="btn" onclick="loadFromCloud()" id="loadBtn">📥 Load from Cloud</button>
+            
+            <div class="export-dropdown">
+                <button class="btn btn-export" onclick="toggleExportMenu()">📊 Export</button>
+                <div class="export-menu" id="exportMenu">
+                    <div class="export-option" onclick="exportToJSON()">📄 Export JSON</div>
+                    <div class="export-option" onclick="exportToExcel()">📈 Export Excel</div>
+                    <div class="export-option" onclick="exportToCSV()">📋 Export CSV</div>
+                    <div class="export-option" onclick="exportLocalData()" style="border-top: 1px solid #ddd; margin-top: 5px; padding-top: 10px;">💾 Export Local Backup</div>
+                </div>
+            </div>
+            
             <div class="save-status saved" id="saveStatus">Ready</div>
             <div id="calculatorBox">
                 <table style="width:100%; border-collapse: collapse; text-align: center;">
@@ -514,18 +582,12 @@
             <table id="taskTable">
                 <thead>
                     <tr>
-                        <th class="job-number" data-column="job">Job #<div class="resize-handle"></div>
-                        </th>
-                        <th class="task-name" data-column="task">Task Name<div class="resize-handle"></div>
-                        </th>
-                        <th class="estimate-col" data-column="estimate">Estimate (h)<div class="resize-handle"></div>
-                        </th>
-                        <th class="filled-col" data-column="filled">Filled (h)<div class="resize-handle"></div>
-                        </th>
-                        <th class="remaining-col" data-column="remaining">Remaining<div class="resize-handle"></div>
-                        </th>
-                        <th class="done-col" data-column="done">Done<div class="resize-handle"></div>
-                        </th>
+                        <th class="job-number" data-column="job">Job #<div class="resize-handle"></div></th>
+                        <th class="task-name" data-column="task">Task Name<div class="resize-handle"></div></th>
+                        <th class="estimate-col" data-column="estimate">Estimate (h)<div class="resize-handle"></div></th>
+                        <th class="filled-col" data-column="filled">Filled (h)<div class="resize-handle"></div></th>
+                        <th class="remaining-col" data-column="remaining">Remaining<div class="resize-handle"></div></th>
+                        <th class="done-col" data-column="done">Done<div class="resize-handle"></div></th>
                         <th class="actions-col">Action</th>
                     </tr>
                 </thead>
@@ -533,7 +595,6 @@
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <!-- Firebase SDK -->
@@ -541,9 +602,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
 
     <script>
-        // Firebase configuration - REPLACE WITH YOUR CONFIG
+        // Firebase configuration
         const firebaseConfig = {
-            // Paste your Firebase config here from Step 3
             apiKey: "AIzaSyAAp2F-8zpv8svX3cdshHVvzDWyDzkWPuM",
             authDomain: "task-manager-personal-f543e.firebaseapp.com",
             projectId: "task-manager-personal-f543e",
@@ -563,7 +623,7 @@
             updateConnectionStatus('connected', '✅ Cloud connected');
         } catch (error) {
             console.warn('Firebase initialization failed, using localStorage only:', error);
-            updateConnectionStatus('disconnected', '❌ Cloud unavailable - Using local storage');
+            updateConnectionStatus('disconnected', '⌛ Cloud unavailable - Using local storage');
         }
 
         let taskData = [];
@@ -573,7 +633,7 @@
         let currentResizeColumn = null;
         let startX = 0;
         let startWidth = 0;
-        let currentUserId = '';
+        let currentAccount = '';
 
         function updateConnectionStatus(status, message) {
             const statusEl = document.getElementById('connectionStatus');
@@ -590,28 +650,47 @@
             });
         }
 
-        function generateUserId() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < 12; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
+        function createAccount() {
+            const accountName = document.getElementById('accountName').value.trim();
+            if (!accountName) {
+                alert('Please enter an account name!');
+                return;
             }
-            document.getElementById('userId').value = result;
-            changeUser();
+            
+            if (accountName.length < 3) {
+                alert('Account name must be at least 3 characters long!');
+                return;
+            }
+
+            changeAccount();
         }
 
-        function changeUser() {
-            const userId = document.getElementById('userId').value.trim();
-            if (userId && userId !== currentUserId) {
-                currentUserId = userId;
-                localStorage.setItem('taskManagerUserId', userId);
-                loadFromCloud();
+        function changeAccount() {
+            const accountName = document.getElementById('accountName').value.trim();
+            if (accountName && accountName !== currentAccount && accountName.length >= 3) {
+                currentAccount = accountName;
+                localStorage.setItem('taskManagerAccount', accountName);
+                
+                // Reset data for new account
+                taskData = [];
+                taskIdCounter = 1;
+                
+                if (isCloudEnabled) {
+                    loadFromCloud();
+                } else {
+                    loadDataLocally();
+                }
+                
+                if (taskData.length === 0) {
+                    addRow();
+                }
+                renderTable();
             }
         }
 
         async function saveToCloud() {
-            if (!isCloudEnabled || !currentUserId) {
-                alert('Please enter a User ID and ensure cloud connection is available!');
+            if (!isCloudEnabled || !currentAccount) {
+                alert('Please create an account and ensure cloud connection is available!');
                 return;
             }
 
@@ -621,10 +700,11 @@
                     tasks: taskData,
                     counter: taskIdCounter,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                    userId: currentUserId
+                    accountName: currentAccount,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                await db.collection('taskData').doc(currentUserId).set(dataToSave);
+                await db.collection('taskAccounts').doc(currentAccount).set(dataToSave);
                 showSaveStatus('saved');
                 console.log('Data saved to cloud successfully');
             } catch (error) {
@@ -636,14 +716,14 @@
         }
 
         async function loadFromCloud() {
-            if (!isCloudEnabled || !currentUserId) {
+            if (!isCloudEnabled || !currentAccount) {
                 loadDataLocally();
                 return;
             }
 
             try {
                 showSaveStatus('loading');
-                const doc = await db.collection('taskData').doc(currentUserId).get();
+                const doc = await db.collection('taskAccounts').doc(currentAccount).get();
 
                 if (doc.exists) {
                     const data = doc.data();
@@ -653,7 +733,7 @@
                     showSaveStatus('loaded');
                     console.log('Data loaded from cloud successfully');
                 } else {
-                    console.log('No cloud data found for this user, starting fresh');
+                    console.log('No cloud data found for this account, starting fresh');
                     taskData = [];
                     taskIdCounter = 1;
                     renderTable();
@@ -667,7 +747,7 @@
         }
 
         function autoSaveToCloud() {
-            if (!isCloudEnabled || !currentUserId) {
+            if (!isCloudEnabled || !currentAccount) {
                 autoSaveLocally();
                 return;
             }
@@ -680,10 +760,10 @@
                         tasks: taskData,
                         counter: taskIdCounter,
                         lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                        userId: currentUserId
+                        accountName: currentAccount
                     };
 
-                    await db.collection('taskData').doc(currentUserId).set(dataToSave);
+                    await db.collection('taskAccounts').doc(currentAccount).set(dataToSave);
                     showSaveStatus('saved');
                 } catch (error) {
                     console.error('Auto-save to cloud failed:', error);
@@ -699,16 +779,18 @@
                     tasks: taskData,
                     counter: taskIdCounter,
                     savedAt: new Date().toISOString(),
-                    userId: currentUserId
+                    accountName: currentAccount
                 };
-                localStorage.setItem('taskManagerData', JSON.stringify(dataToSave));
+                localStorage.setItem(`taskManagerData_${currentAccount}`, JSON.stringify(dataToSave));
             } catch (e) {
                 console.error('Error saving locally:', e);
             }
         }
 
         function loadDataLocally() {
-            const saved = localStorage.getItem('taskManagerData');
+            if (!currentAccount) return;
+            
+            const saved = localStorage.getItem(`taskManagerData_${currentAccount}`);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
@@ -738,26 +820,123 @@
             switch (status) {
                 case 'saved':
                     statusEl.classList.add('saved');
-                    statusEl.textContent = '✅ Saved to cloud';
+                    statusEl.textContent = '✅ Saved';
                     break;
                 case 'saving':
                     statusEl.classList.add('saving');
-                    statusEl.textContent = '⏳ Saving to cloud...';
+                    statusEl.textContent = '⏳ Saving...';
                     break;
                 case 'loading':
                     statusEl.classList.add('saving');
-                    statusEl.textContent = '⏳ Loading from cloud...';
+                    statusEl.textContent = '⏳ Loading...';
                     break;
                 case 'loaded':
                     statusEl.classList.add('saved');
-                    statusEl.textContent = '✅ Loaded from cloud';
+                    statusEl.textContent = '✅ Loaded';
                     break;
                 case 'error':
                     statusEl.style.background = '#f8d7da';
                     statusEl.style.color = '#721c24';
-                    statusEl.textContent = '❌ Cloud error';
+                    statusEl.textContent = '⌛ Error';
                     break;
             }
+        }
+
+        // Export functions
+        function toggleExportMenu() {
+            const menu = document.getElementById('exportMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Close export menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.export-dropdown');
+            if (!dropdown.contains(event.target)) {
+                document.getElementById('exportMenu').classList.remove('show');
+            }
+        });
+
+        function exportToJSON() {
+            const exportData = {
+                accountName: currentAccount,
+                tasks: taskData,
+                exportDate: new Date().toISOString(),
+                totalTasks: taskData.length,
+                completedTasks: taskData.filter(task => task.done).length,
+                totalEstimateHours: taskData.reduce((sum, task) => sum + (task.estimate || 0), 0),
+                totalFilledHours: taskData.reduce((sum, task) => sum + (task.filled || 0), 0)
+            };
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            document.getElementById('exportMenu').classList.remove('show');
+        }
+
+        function exportToExcel() {
+            // Create CSV content for Excel compatibility
+            const headers = ['Job #', 'Task Name', 'Estimate (h)', 'Filled (h)', 'Remaining (h)', 'Progress (%)', 'Status'];
+            const csvContent = [
+                headers.join(','),
+                ...taskData.map(task => {
+                    const remaining = Math.max(0, (task.estimate || 0) - (task.filled || 0));
+                    const progress = task.estimate > 0 ? Math.min(100, ((task.filled || 0) / task.estimate) * 100) : 0;
+                    return [
+                        task.jobNumber || '',
+                        `"${(task.taskName || '').replace(/"/g, '""')}"`,
+                        task.estimate || 0,
+                        task.filled || 0,
+                        remaining.toFixed(1),
+                        progress.toFixed(1),
+                        task.done ? 'Completed' : 'In Progress'
+                    ].join(',');
+                })
+            ].join('\n');
+
+            // Add BOM for proper Excel UTF-8 handling
+            const BOM = '\uFEFF';
+            const dataBlob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            link.click();
+            
+            document.getElementById('exportMenu').classList.remove('show');
+        }
+
+        function exportToCSV() {
+            const headers = ['Job #', 'Task Name', 'Estimate (h)', 'Filled (h)', 'Remaining (h)', 'Progress (%)', 'Status'];
+            const csvContent = [
+                headers.join(','),
+                ...taskData.map(task => {
+                    const remaining = Math.max(0, (task.estimate || 0) - (task.filled || 0));
+                    const progress = task.estimate > 0 ? Math.min(100, ((task.filled || 0) / task.estimate) * 100) : 0;
+                    return [
+                        task.jobNumber || '',
+                        `"${(task.taskName || '').replace(/"/g, '""')}"`,
+                        task.estimate || 0,
+                        task.filled || 0,
+                        remaining.toFixed(1),
+                        progress.toFixed(1),
+                        task.done ? 'Completed' : 'In Progress'
+                    ].join(',');
+                })
+            ].join('\n');
+
+            const dataBlob = new Blob([csvContent], { type: 'text/csv' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            document.getElementById('exportMenu').classList.remove('show');
         }
 
         // Column resize functionality
@@ -808,27 +987,32 @@
 
         // Initialize on page load
         window.addEventListener('load', function () {
-            // Load saved user ID
-            const savedUserId = localStorage.getItem('taskManagerUserId');
-            if (savedUserId) {
-                document.getElementById('userId').value = savedUserId;
-                currentUserId = savedUserId;
+            // Load saved account name
+            const savedAccount = localStorage.getItem('taskManagerAccount');
+            if (savedAccount) {
+                document.getElementById('accountName').value = savedAccount;
+                currentAccount = savedAccount;
+                
+                // Load data for the saved account
+                if (isCloudEnabled) {
+                    loadFromCloud();
+                } else {
+                    loadDataLocally();
+                }
             }
 
-            // Load data
-            if (currentUserId && isCloudEnabled) {
-                loadFromCloud();
-            } else {
-                loadDataLocally();
-            }
-
-            if (taskData.length === 0) {
+            if (taskData.length === 0 && currentAccount) {
                 addRow();
             }
             initializeColumnResize();
         });
 
         function addRow() {
+            if (!currentAccount) {
+                alert('Please create an account first!');
+                return;
+            }
+            
             const newTask = {
                 id: taskIdCounter++,
                 jobNumber: taskIdCounter - 1,
