@@ -787,21 +787,15 @@
             }
         }
 
-        function loadDataLocally() {
-            if (!currentAccount) return;
-            
-            const saved = localStorage.getItem(`taskManagerData_${currentAccount}`);
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    taskData = parsed.tasks || [];
-                    taskIdCounter = parsed.counter || 1;
-                } catch (e) {
-                    console.error('Error loading local data:', e);
-                    taskData = [];
-                }
+        // Add manual local save function
+        function saveToLocal() {
+            if (!currentAccount) {
+                alert('Please create an account first!');
+                return;
             }
-            renderTable();
+            saveDataLocally();
+            showSaveStatus('saved');
+            console.log('Data saved to local storage successfully!');
         }
 
         function autoSaveLocally() {
