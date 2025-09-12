@@ -746,33 +746,6 @@
             }
         }
 
-        function autoSaveToCloud() {
-            if (!isCloudEnabled || !currentAccount) {
-                autoSaveLocally();
-                return;
-            }
-
-            clearTimeout(autoSaveTimeout);
-            showSaveStatus('saving');
-            autoSaveTimeout = setTimeout(async () => {
-                try {
-                    const dataToSave = {
-                        tasks: taskData,
-                        counter: taskIdCounter,
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                        accountName: currentAccount
-                    };
-
-                    await db.collection('taskAccounts').doc(currentAccount).set(dataToSave);
-                    showSaveStatus('saved');
-                } catch (error) {
-                    console.error('Auto-save to cloud failed:', error);
-                    saveDataLocally();
-                    showSaveStatus('saved');
-                }
-            }, 2000);
-        }
-
         function saveDataLocally() {
             try {
                 const dataToSave = {
@@ -787,18 +760,29 @@
             }
         }
 
-        // Add manual local save function
-        function saveToLocal() {
-            if (!currentAccount) {
-                alert('Please create an account first!');
-                return;
+        function loadDataLocally() {
+            if (!currentAccount) return;
+            
+            try {
+                const savedData = localStorage.getItem(`taskManagerData_${currentAccount}`);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    taskData = data.tasks || [];
+                    taskIdCounter = data.counter || 1;
+                    renderTable();
+                    console.log('Data loaded from local storage');
+                }
+            } catch (e) {
+                console.error('Error loading from local storage:', e);
+                taskData = [];
+                taskIdCounter = 1;
             }
-            saveDataLocally();
-            showSaveStatus('saved');
-            console.log('Data saved to local storage successfully!');
         }
 
+        // Auto-save to local storage only
         function autoSaveLocally() {
+            if (!currentAccount) return;
+            
             clearTimeout(autoSaveTimeout);
             showSaveStatus('saving');
             autoSaveTimeout = setTimeout(() => {
@@ -933,6 +917,31 @@
             document.getElementById('exportMenu').classList.remove('show');
         }
 
+        function exportLocalData() {
+            if (!currentAccount) {
+                alert('Please create an account first!');
+                return;
+            }
+
+            const exportData = {
+                accountName: currentAccount,
+                tasks: taskData,
+                counter: taskIdCounter,
+                exportDate: new Date().toISOString(),
+                exportType: 'local_backup'
+            };
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `local_backup_${currentAccount}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            document.getElementById('exportMenu').classList.remove('show');
+        }
+
         // Column resize functionality
         function initializeColumnResize() {
             const resizeHandles = document.querySelectorAll('.resize-handle');
@@ -1017,13 +1026,13 @@
             };
             taskData.push(newTask);
             renderTable();
-            autoSaveToCloud();
+            autoSaveLocally(); // Only auto-save to local storage
         }
 
         function deleteRow(id) {
             taskData = taskData.filter(task => task.id !== id);
             renderTable();
-            autoSaveToCloud();
+            autoSaveLocally(); // Only auto-save to local storage
         }
 
         function updateTask(id, field, value) {
@@ -1037,7 +1046,7 @@
                     task[field] = value;
                 }
                 renderTable();
-                autoSaveToCloud();
+                autoSaveLocally(); // Only auto-save to local storage
             }
         }
 
