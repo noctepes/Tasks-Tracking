@@ -264,7 +264,7 @@
         input[type="number"],
         select {
             width: 100%;
-            padding: 10px 12px;
+            padding: 10px 5px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 14px;
@@ -497,6 +497,37 @@
             color: #667eea;
             font-weight: 500;
         }
+        .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+}
+.hamburger div {
+    width: 25px;
+    height: 3px;
+    background: #667eea;
+    border-radius: 2px;
+}
+@media (max-width: 768px) {
+    .controls {
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .controls.show {
+        display: flex;
+    }
+    .hamburger {
+        display: flex;
+        margin: 10px;
+    }
+    .task-name input {
+        min-width: 150px;
+        word-break: break-word;
+    }
+}
+
     </style>
 </head>
 
@@ -506,25 +537,26 @@
             <h1>Task Management System</h1>
             <p>Organize, track, and complete your projects efficiently - Personal Account</p>
         </div>
-
         <div class="account-controls">
             <div class="account-section">
                 <label for="accountName">Account Name:</label>
-                <input type="text" id="accountName" class="account-input" placeholder="Enter account name..."
-                    onchange="changeAccount()" maxlength="50">
+                <input type="text" id="accountName" class="account-input" placeholder="Enter account name..." onchange="changeAccount()" maxlength="50">
                 <button class="btn" onclick="createAccount()">✨ Create Account</button>
             </div>
             <div class="connection-status loading" id="connectionStatus">
                 🔄 Connecting to cloud...
             </div>
         </div>
-
-        <div class="controls">
+        <div class="hamburger" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="controls" id="menuControls">
             <button class="btn" onclick="addRow()" id="addBtn">+ Add Task</button>
             <button class="btn" onclick="toggleCalculator()">🧮 Calculator</button>
             <button class="btn" onclick="saveToCloud()" id="saveBtn">☁️ Save to Cloud</button>
             <button class="btn" onclick="loadFromCloud()" id="loadBtn">📥 Load from Cloud</button>
-            
             <div class="export-dropdown">
                 <button class="btn btn-export" onclick="toggleExportMenu()">📊 Export</button>
                 <div class="export-menu" id="exportMenu">
@@ -534,7 +566,6 @@
                     <div class="export-option" onclick="exportLocalData()" style="border-top: 1px solid #ddd; margin-top: 5px; padding-top: 10px;">💾 Export Local Backup</div>
                 </div>
             </div>
-            
             <div class="save-status saved" id="saveStatus">Ready</div>
             <div id="calculatorBox">
                 <table style="width:100%; border-collapse: collapse; text-align: center;">
@@ -577,17 +608,22 @@
                 </table>
             </div>
         </div>
-
         <div class="table-container">
             <table id="taskTable">
                 <thead>
                     <tr>
-                        <th class="job-number" data-column="job">Job #<div class="resize-handle"></div></th>
-                        <th class="task-name" data-column="task">Task Name<div class="resize-handle"></div></th>
-                        <th class="estimate-col" data-column="estimate">Estimate (h)<div class="resize-handle"></div></th>
-                        <th class="filled-col" data-column="filled">Filled (h)<div class="resize-handle"></div></th>
-                        <th class="remaining-col" data-column="remaining">Remaining<div class="resize-handle"></div></th>
-                        <th class="done-col" data-column="done">Done<div class="resize-handle"></div></th>
+                        <th class="job-number" data-column="job">Job #<div class="resize-handle"></div>
+                        </th>
+                        <th class="task-name" data-column="task">Task Name<div class="resize-handle"></div>
+                        </th>
+                        <th class="estimate-col" data-column="estimate">Estimate (h)<div class="resize-handle"></div>
+                        </th>
+                        <th class="filled-col" data-column="filled">Filled (h)<div class="resize-handle"></div>
+                        </th>
+                        <th class="remaining-col" data-column="remaining">Remaining<div class="resize-handle"></div>
+                        </th>
+                        <th class="done-col" data-column="done">Done<div class="resize-handle"></div>
+                        </th>
                         <th class="actions-col">Action</th>
                     </tr>
                 </thead>
@@ -596,480 +632,487 @@
             </table>
         </div>
     </div>
-
     <!-- Firebase SDK -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
-
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAAp2F-8zpv8svX3cdshHVvzDWyDzkWPuM",
-            authDomain: "task-manager-personal-f543e.firebaseapp.com",
-            projectId: "task-manager-personal-f543e",
-            storageBucket: "task-manager-personal-f543e.firebasestorage.app",
-            messagingSenderId: "439010018138",
-            appId: "1:439010018138:web:e497a23cae97bc77e52963"
-        };
+    function toggleMenu() {
+        document.getElementById('menuControls').classList.toggle('show');
+    }
 
-        // Initialize Firebase
-        let db;
-        let isCloudEnabled = false;
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAAp2F-8zpv8svX3cdshHVvzDWyDzkWPuM",
+        authDomain: "task-manager-personal-f543e.firebaseapp.com",
+        projectId: "task-manager-personal-f543e",
+        storageBucket: "task-manager-personal-f543e.firebasestorage.app",
+        messagingSenderId: "439010018138",
+        appId: "1:439010018138:web:e497a23cae97bc77e52963"
+    };
 
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            isCloudEnabled = true;
-            updateConnectionStatus('connected', '✅ Cloud connected');
-        } catch (error) {
-            console.warn('Firebase initialization failed, using localStorage only:', error);
-            updateConnectionStatus('disconnected', '⌛ Cloud unavailable - Using local storage');
-        }
+    // Initialize Firebase
+    let db;
+    let isCloudEnabled = false;
 
-        let taskData = [];
-        let autoSaveTimeout;
-        let taskIdCounter = 1;
-        let isResizing = false;
-        let currentResizeColumn = null;
-        let startX = 0;
-        let startWidth = 0;
-        let currentAccount = '';
+    try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        isCloudEnabled = true;
+        updateConnectionStatus('connected', '✅ Cloud connected');
+    } catch (error) {
+        console.warn('Firebase initialization failed, using localStorage only:', error);
+        updateConnectionStatus('disconnected', '⌛ Cloud unavailable - Using local storage');
+    }
 
-        function updateConnectionStatus(status, message) {
-            const statusEl = document.getElementById('connectionStatus');
-            statusEl.className = `connection-status ${status}`;
-            statusEl.textContent = message;
+    let taskData = [];
+    let autoSaveTimeout;
+    let taskIdCounter = 1;
+    let isResizing = false;
+    let currentResizeColumn = null;
+    let startX = 0;
+    let startWidth = 0;
+    let currentAccount = '';
 
-            // Enable/disable cloud buttons
-            const cloudButtons = ['saveBtn', 'loadBtn'];
-            cloudButtons.forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.disabled = !isCloudEnabled;
-                }
-            });
-        }
+    function updateConnectionStatus(status, message) {
+        const statusEl = document.getElementById('connectionStatus');
+        statusEl.className = `connection-status ${status}`;
+        statusEl.textContent = message;
 
-        function createAccount() {
-            const accountName = document.getElementById('accountName').value.trim();
-            if (!accountName) {
-                alert('Please enter an account name!');
-                return;
-            }
-            
-            if (accountName.length < 3) {
-                alert('Account name must be at least 3 characters long!');
-                return;
-            }
-
-            changeAccount();
-        }
-
-        function changeAccount() {
-            const accountName = document.getElementById('accountName').value.trim();
-            if (accountName && accountName !== currentAccount && accountName.length >= 3) {
-                currentAccount = accountName;
-                localStorage.setItem('taskManagerAccount', accountName);
-                
-                // Reset data for new account
-                taskData = [];
-                taskIdCounter = 1;
-                
-                if (isCloudEnabled) {
-                    loadFromCloud();
-                } else {
-                    loadDataLocally();
-                }
-                
-                if (taskData.length === 0) {
-                    addRow();
-                }
-                renderTable();
-            }
-        }
-
-        async function saveToCloud() {
-            if (!isCloudEnabled || !currentAccount) {
-                alert('Please create an account and ensure cloud connection is available!');
-                return;
-            }
-
-            try {
-                showSaveStatus('saving');
-                const dataToSave = {
-                    tasks: taskData,
-                    counter: taskIdCounter,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                    accountName: currentAccount,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                await db.collection('taskAccounts').doc(currentAccount).set(dataToSave);
-                showSaveStatus('saved');
-                console.log('Data saved to cloud successfully');
-            } catch (error) {
-                console.error('Error saving to cloud:', error);
-                showSaveStatus('error');
-                alert('Error saving to cloud. Data saved locally instead.');
-                saveDataLocally();
-            }
-        }
-
-        async function loadFromCloud() {
-            if (!isCloudEnabled || !currentAccount) {
-                loadDataLocally();
-                return;
-            }
-
-            try {
-                showSaveStatus('loading');
-                const doc = await db.collection('taskAccounts').doc(currentAccount).get();
-
-                if (doc.exists) {
-                    const data = doc.data();
-                    taskData = data.tasks || [];
-                    taskIdCounter = data.counter || 1;
-                    renderTable();
-                    showSaveStatus('loaded');
-                    console.log('Data loaded from cloud successfully');
-                } else {
-                    console.log('No cloud data found for this account, starting fresh');
-                    taskData = [];
-                    taskIdCounter = 1;
-                    renderTable();
-                    showSaveStatus('saved');
-                }
-            } catch (error) {
-                console.error('Error loading from cloud:', error);
-                showSaveStatus('error');
-                loadDataLocally();
-            }
-        }
-
-        function saveDataLocally() {
-            try {
-                const dataToSave = {
-                    tasks: taskData,
-                    counter: taskIdCounter,
-                    savedAt: new Date().toISOString(),
-                    accountName: currentAccount
-                };
-                localStorage.setItem(`taskManagerData_${currentAccount}`, JSON.stringify(dataToSave));
-            } catch (e) {
-                console.error('Error saving locally:', e);
-            }
-        }
-
-        function loadDataLocally() {
-            if (!currentAccount) return;
-            
-            try {
-                const savedData = localStorage.getItem(`taskManagerData_${currentAccount}`);
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    taskData = data.tasks || [];
-                    taskIdCounter = data.counter || 1;
-                    renderTable();
-                    console.log('Data loaded from local storage');
-                }
-            } catch (e) {
-                console.error('Error loading from local storage:', e);
-                taskData = [];
-                taskIdCounter = 1;
-            }
-        }
-
-        // Auto-save to local storage only
-        function autoSaveLocally() {
-            if (!currentAccount) return;
-            
-            clearTimeout(autoSaveTimeout);
-            showSaveStatus('saving');
-            autoSaveTimeout = setTimeout(() => {
-                saveDataLocally();
-                showSaveStatus('saved');
-            }, 1000);
-        }
-
-        function showSaveStatus(status) {
-            const statusEl = document.getElementById('saveStatus');
-            statusEl.className = 'save-status';
-
-            switch (status) {
-                case 'saved':
-                    statusEl.classList.add('saved');
-                    statusEl.textContent = '✅ Saved';
-                    break;
-                case 'saving':
-                    statusEl.classList.add('saving');
-                    statusEl.textContent = '⏳ Saving...';
-                    break;
-                case 'loading':
-                    statusEl.classList.add('saving');
-                    statusEl.textContent = '⏳ Loading...';
-                    break;
-                case 'loaded':
-                    statusEl.classList.add('saved');
-                    statusEl.textContent = '✅ Loaded';
-                    break;
-                case 'error':
-                    statusEl.style.background = '#f8d7da';
-                    statusEl.style.color = '#721c24';
-                    statusEl.textContent = '⌛ Error';
-                    break;
-            }
-        }
-
-        // Export functions
-        function toggleExportMenu() {
-            const menu = document.getElementById('exportMenu');
-            menu.classList.toggle('show');
-        }
-
-        // Close export menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.querySelector('.export-dropdown');
-            if (!dropdown.contains(event.target)) {
-                document.getElementById('exportMenu').classList.remove('show');
+        // Enable/disable cloud buttons
+        const cloudButtons = ['saveBtn', 'loadBtn'];
+        cloudButtons.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.disabled = !isCloudEnabled;
             }
         });
+    }
 
-        function exportToJSON() {
-            const exportData = {
-                accountName: currentAccount,
-                tasks: taskData,
-                exportDate: new Date().toISOString(),
-                totalTasks: taskData.length,
-                completedTasks: taskData.filter(task => task.done).length,
-                totalEstimateHours: taskData.reduce((sum, task) => sum + (task.estimate || 0), 0),
-                totalFilledHours: taskData.reduce((sum, task) => sum + (task.filled || 0), 0)
-            };
-
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            document.getElementById('exportMenu').classList.remove('show');
+    function createAccount() {
+        const accountName = document.getElementById('accountName').value.trim();
+        if (!accountName) {
+            alert('Please enter an account name!');
+            return;
         }
 
-        function exportToExcel() {
-            // Create CSV content for Excel compatibility
-            const headers = ['Job #', 'Task Name', 'Estimate (h)', 'Filled (h)', 'Remaining (h)', 'Progress (%)', 'Status'];
-            const csvContent = [
-                headers.join(','),
-                ...taskData.map(task => {
-                    const remaining = Math.max(0, (task.estimate || 0) - (task.filled || 0));
-                    const progress = task.estimate > 0 ? Math.min(100, ((task.filled || 0) / task.estimate) * 100) : 0;
-                    return [
-                        task.jobNumber || '',
-                        `"${(task.taskName || '').replace(/"/g, '""')}"`,
-                        task.estimate || 0,
-                        task.filled || 0,
-                        remaining.toFixed(1),
-                        progress.toFixed(1),
-                        task.done ? 'Completed' : 'In Progress'
-                    ].join(',');
-                })
-            ].join('\n');
-
-            // Add BOM for proper Excel UTF-8 handling
-            const BOM = '\uFEFF';
-            const dataBlob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.xlsx`;
-            link.click();
-            
-            document.getElementById('exportMenu').classList.remove('show');
+        if (accountName.length < 3) {
+            alert('Account name must be at least 3 characters long!');
+            return;
         }
 
-        function exportToCSV() {
-            const headers = ['Job #', 'Task Name', 'Estimate (h)', 'Filled (h)', 'Remaining (h)', 'Progress (%)', 'Status'];
-            const csvContent = [
-                headers.join(','),
-                ...taskData.map(task => {
-                    const remaining = Math.max(0, (task.estimate || 0) - (task.filled || 0));
-                    const progress = task.estimate > 0 ? Math.min(100, ((task.filled || 0) / task.estimate) * 100) : 0;
-                    return [
-                        task.jobNumber || '',
-                        `"${(task.taskName || '').replace(/"/g, '""')}"`,
-                        task.estimate || 0,
-                        task.filled || 0,
-                        remaining.toFixed(1),
-                        progress.toFixed(1),
-                        task.done ? 'Completed' : 'In Progress'
-                    ].join(',');
-                })
-            ].join('\n');
+        changeAccount();
+    }
 
-            const dataBlob = new Blob([csvContent], { type: 'text/csv' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-            
-            document.getElementById('exportMenu').classList.remove('show');
-        }
+    function changeAccount() {
+        const accountName = document.getElementById('accountName').value.trim();
+        if (accountName && accountName !== currentAccount && accountName.length >= 3) {
+            currentAccount = accountName;
+            localStorage.setItem('taskManagerAccount', accountName);
 
-        function exportLocalData() {
-            if (!currentAccount) {
-                alert('Please create an account first!');
-                return;
+            // Reset data for new account
+            taskData = [];
+            taskIdCounter = 1;
+
+            if (isCloudEnabled) {
+                loadFromCloud();
+            } else {
+                loadDataLocally();
             }
 
-            const exportData = {
-                accountName: currentAccount,
-                tasks: taskData,
-                counter: taskIdCounter,
-                exportDate: new Date().toISOString(),
-                exportType: 'local_backup'
-            };
-
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `local_backup_${currentAccount}_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            document.getElementById('exportMenu').classList.remove('show');
-        }
-
-        // Column resize functionality
-        function initializeColumnResize() {
-            const resizeHandles = document.querySelectorAll('.resize-handle');
-            resizeHandles.forEach(handle => {
-                handle.addEventListener('mousedown', startResize);
-            });
-        }
-
-        function startResize(e) {
-            e.preventDefault();
-            isResizing = true;
-            currentResizeColumn = e.target.closest('th');
-            startX = e.clientX;
-            startWidth = currentResizeColumn.offsetWidth;
-
-            currentResizeColumn.querySelector('.resize-handle').classList.add('resizing');
-            document.body.style.cursor = 'col-resize';
-            document.body.style.userSelect = 'none';
-
-            document.addEventListener('mousemove', doResize);
-            document.addEventListener('mouseup', stopResize);
-        }
-
-        function doResize(e) {
-            if (!isResizing) return;
-            const diff = e.clientX - startX;
-            const newWidth = Math.max(50, startWidth + diff);
-            currentResizeColumn.style.width = newWidth + 'px';
-            currentResizeColumn.style.minWidth = newWidth + 'px';
-        }
-
-        function stopResize() {
-            if (!isResizing) return;
-            isResizing = false;
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-
-            if (currentResizeColumn) {
-                currentResizeColumn.querySelector('.resize-handle').classList.remove('resizing');
-                currentResizeColumn = null;
-            }
-
-            document.removeEventListener('mousemove', doResize);
-            document.removeEventListener('mouseup', stopResize);
-        }
-
-        // Initialize on page load
-        window.addEventListener('load', function () {
-            // Load saved account name
-            const savedAccount = localStorage.getItem('taskManagerAccount');
-            if (savedAccount) {
-                document.getElementById('accountName').value = savedAccount;
-                currentAccount = savedAccount;
-                
-                // Load data for the saved account
-                if (isCloudEnabled) {
-                    loadFromCloud();
-                } else {
-                    loadDataLocally();
-                }
-            }
-
-            if (taskData.length === 0 && currentAccount) {
+            if (taskData.length === 0) {
                 addRow();
             }
-            initializeColumnResize();
-        });
+            renderTable();
+        }
+    }
 
-        function addRow() {
-            if (!currentAccount) {
-                alert('Please create an account first!');
-                return;
-            }
-            
-            const newTask = {
-                id: taskIdCounter++,
-                jobNumber: taskIdCounter - 1,
-                taskName: '',
-                estimate: 0,
-                filled: 0,
-                done: false
+    async function saveToCloud() {
+        if (!isCloudEnabled || !currentAccount) {
+            alert('Please create an account and ensure cloud connection is available!');
+            return;
+        }
+
+        try {
+            showSaveStatus('cloudsaved');
+            const dataToSave = {
+                tasks: taskData,
+                counter: taskIdCounter,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                accountName: currentAccount,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
-            taskData.push(newTask);
-            renderTable();
-            autoSaveLocally(); // Only auto-save to local storage
+
+            await db.collection('taskAccounts').doc(currentAccount).set(dataToSave);
+            showSaveStatus('saved');
+            console.log('Data saved to cloud successfully');
+        } catch (error) {
+            console.error('Error saving to cloud:', error);
+            showSaveStatus('error');
+            alert('Error saving to cloud. Data saved locally instead.');
+            saveDataLocally();
+        }
+    }
+
+    async function loadFromCloud() {
+        if (!isCloudEnabled || !currentAccount) {
+            loadDataLocally();
+            return;
         }
 
-        function deleteRow(id) {
-            taskData = taskData.filter(task => task.id !== id);
-            renderTable();
-            autoSaveLocally(); // Only auto-save to local storage
-        }
+        try {
+            showSaveStatus('loading');
+            const doc = await db.collection('taskAccounts').doc(currentAccount).get();
 
-        function updateTask(id, field, value) {
-            const task = taskData.find(t => t.id === id);
-            if (task) {
-                if (field === 'done') {
-                    task[field] = value;
-                } else if (field === 'estimate' || field === 'filled') {
-                    task[field] = parseFloat(value) || 0;
-                } else {
-                    task[field] = value;
-                }
+            if (doc.exists) {
+                const data = doc.data();
+                taskData = data.tasks || [];
+                taskIdCounter = data.counter || 1;
                 renderTable();
-                autoSaveLocally(); // Only auto-save to local storage
+                showSaveStatus('loaded');
+                console.log('Data loaded from cloud successfully');
+            } else {
+                console.log('No cloud data found for this account, starting fresh');
+                taskData = [];
+                taskIdCounter = 1;
+                renderTable();
+                showSaveStatus('saved');
+            }
+        } catch (error) {
+            console.error('Error loading from cloud:', error);
+            showSaveStatus('error');
+            loadDataLocally();
+        }
+    }
+
+    function saveDataLocally() {
+        try {
+            const dataToSave = {
+                tasks: taskData,
+                counter: taskIdCounter,
+                savedAt: new Date().toISOString(),
+                accountName: currentAccount
+            };
+            localStorage.setItem(`taskManagerData_${currentAccount}`, JSON.stringify(dataToSave));
+        } catch (e) {
+            console.error('Error saving locally:', e);
+        }
+    }
+
+    function loadDataLocally() {
+        if (!currentAccount) return;
+
+        try {
+            const savedData = localStorage.getItem(`taskManagerData_${currentAccount}`);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                taskData = data.tasks || [];
+                taskIdCounter = data.counter || 1;
+                renderTable();
+                console.log('Data loaded from local storage');
+            }
+        } catch (e) {
+            console.error('Error loading from local storage:', e);
+            taskData = [];
+            taskIdCounter = 1;
+        }
+    }
+
+    // Auto-save to local storage only
+    function autoSaveLocally() {
+        if (!currentAccount) return;
+
+        clearTimeout(autoSaveTimeout);
+        showSaveStatus('saving');
+        autoSaveTimeout = setTimeout(() => {
+            saveDataLocally();
+            showSaveStatus('saved');
+        }, 1000);
+    }
+
+    function showSaveStatus(status) {
+        const statusEl = document.getElementById('saveStatus');
+        statusEl.className = 'save-status';
+
+        switch (status) {
+            case 'saved':
+                statusEl.classList.add('saved');
+                statusEl.textContent = '💾 Saved locally';
+                break;
+            case 'saving':
+                statusEl.classList.add('saving');
+                statusEl.textContent = '⏳ Saving...';
+                break;
+            case 'loading':
+                statusEl.classList.add('saving');
+                statusEl.textContent = '⏳ Loading...';
+                break;
+            case 'loaded':
+                statusEl.classList.add('saved');
+                statusEl.textContent = '☁️ Loaded from cloud';
+                break;
+            case 'cloudsaved':
+                statusEl.classList.add('saved');
+                statusEl.textContent = '☁️ Saved to cloud';
+                break;
+            case 'error':
+                statusEl.style.background = '#f8d7da';
+                statusEl.style.color = '#721c24';
+                statusEl.textContent = '⌛ Error';
+                break;
+        }
+    }
+
+
+    // Export functions
+    function toggleExportMenu() {
+        const menu = document.getElementById('exportMenu');
+        menu.classList.toggle('show');
+    }
+
+    // Close export menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.querySelector('.export-dropdown');
+        if (!dropdown.contains(event.target)) {
+            document.getElementById('exportMenu').classList.remove('show');
+        }
+    });
+
+    function exportToJSON() {
+        const exportData = {
+            accountName: currentAccount,
+            tasks: taskData,
+            exportDate: new Date().toISOString(),
+            totalTasks: taskData.length,
+            completedTasks: taskData.filter(task => task.done).length,
+            totalEstimateHours: taskData.reduce((sum, task) => sum + (task.estimate || 0), 0),
+            totalFilledHours: taskData.reduce((sum, task) => sum + (task.filled || 0), 0)
+        };
+
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+
+        document.getElementById('exportMenu').classList.remove('show');
+    }
+
+    function exportToExcel() {
+        // Create CSV content for Excel compatibility
+        const headers = ['Job #', 'Task Name', 'Estimate (h)', 'Filled (h)', 'Remaining (h)', 'Progress (%)', 'Status'];
+        const csvContent = [
+            headers.join(','),
+            ...taskData.map(task => {
+                const remaining = Math.max(0, (task.estimate || 0) - (task.filled || 0));
+                const progress = task.estimate > 0 ? Math.min(100, ((task.filled || 0) / task.estimate) * 100) : 0;
+                return [
+                    task.jobNumber || '',
+                    `"${(task.taskName || '').replace(/"/g, '""')}"`,
+                    task.estimate || 0,
+                    task.filled || 0,
+                    remaining.toFixed(1),
+                    progress.toFixed(1),
+                    task.done ? 'Completed' : 'In Progress'
+                ].join(',');
+            })
+        ].join('\n');
+
+        // Add BOM for proper Excel UTF-8 handling
+        const BOM = '\uFEFF';
+        const dataBlob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.click();
+
+        document.getElementById('exportMenu').classList.remove('show');
+    }
+
+    function exportToCSV() {
+        const headers = ['Job #', 'Task Name', 'Estimate (h)', 'Filled (h)', 'Remaining (h)', 'Progress (%)', 'Status'];
+        const csvContent = [
+            headers.join(','),
+            ...taskData.map(task => {
+                const remaining = Math.max(0, (task.estimate || 0) - (task.filled || 0));
+                const progress = task.estimate > 0 ? Math.min(100, ((task.filled || 0) / task.estimate) * 100) : 0;
+                return [
+                    task.jobNumber || '',
+                    `"${(task.taskName || '').replace(/"/g, '""')}"`,
+                    task.estimate || 0,
+                    task.filled || 0,
+                    remaining.toFixed(1),
+                    progress.toFixed(1),
+                    task.done ? 'Completed' : 'In Progress'
+                ].join(',');
+            })
+        ].join('\n');
+
+        const dataBlob = new Blob([csvContent], { type: 'text/csv' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `tasks_${currentAccount}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+
+        document.getElementById('exportMenu').classList.remove('show');
+    }
+
+    function exportLocalData() {
+        if (!currentAccount) {
+            alert('Please create an account first!');
+            return;
+        }
+
+        const exportData = {
+            accountName: currentAccount,
+            tasks: taskData,
+            counter: taskIdCounter,
+            exportDate: new Date().toISOString(),
+            exportType: 'local_backup'
+        };
+
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `local_backup_${currentAccount}_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+
+        document.getElementById('exportMenu').classList.remove('show');
+    }
+
+    // Column resize functionality
+    function initializeColumnResize() {
+        const resizeHandles = document.querySelectorAll('.resize-handle');
+        resizeHandles.forEach(handle => {
+            handle.addEventListener('mousedown', startResize);
+        });
+    }
+
+    function startResize(e) {
+        e.preventDefault();
+        isResizing = true;
+        currentResizeColumn = e.target.closest('th');
+        startX = e.clientX;
+        startWidth = currentResizeColumn.offsetWidth;
+
+        currentResizeColumn.querySelector('.resize-handle').classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+
+        document.addEventListener('mousemove', doResize);
+        document.addEventListener('mouseup', stopResize);
+    }
+
+    function doResize(e) {
+        if (!isResizing) return;
+        const diff = e.clientX - startX;
+        const newWidth = Math.max(50, startWidth + diff);
+        currentResizeColumn.style.width = newWidth + 'px';
+        currentResizeColumn.style.minWidth = newWidth + 'px';
+    }
+
+    function stopResize() {
+        if (!isResizing) return;
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+
+        if (currentResizeColumn) {
+            currentResizeColumn.querySelector('.resize-handle').classList.remove('resizing');
+            currentResizeColumn = null;
+        }
+
+        document.removeEventListener('mousemove', doResize);
+        document.removeEventListener('mouseup', stopResize);
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', function() {
+        // Load saved account name
+        const savedAccount = localStorage.getItem('taskManagerAccount');
+        if (savedAccount) {
+            document.getElementById('accountName').value = savedAccount;
+            currentAccount = savedAccount;
+
+            // Load data for the saved account
+            if (isCloudEnabled) {
+                loadFromCloud();
+            } else {
+                loadDataLocally();
             }
         }
 
-        function calculateRemaining(estimate, filled) {
-            return Math.max(0, estimate - filled);
+        if (taskData.length === 0 && currentAccount) {
+            addRow();
+        }
+        initializeColumnResize();
+    });
+
+    function addRow() {
+        if (!currentAccount) {
+            alert('Please create an account first!');
+            return;
         }
 
-        function calculateProgress(estimate, filled) {
-            if (estimate === 0) return 0;
-            return Math.min(100, (filled / estimate) * 100);
+        const newTask = {
+            id: taskIdCounter++,
+            jobNumber: taskIdCounter - 1,
+            taskName: '',
+            estimate: 0,
+            filled: 0,
+            done: false
+        };
+        taskData.push(newTask);
+        renderTable();
+        autoSaveLocally(); // Only auto-save to local storage
+    }
+
+    function deleteRow(id) {
+        taskData = taskData.filter(task => task.id !== id);
+        renderTable();
+        autoSaveLocally(); // Only auto-save to local storage
+    }
+
+    function updateTask(id, field, value) {
+        const task = taskData.find(t => t.id === id);
+        if (task) {
+            if (field === 'done') {
+                task[field] = value;
+            } else if (field === 'estimate' || field === 'filled') {
+                task[field] = parseFloat(value) || 0;
+            } else {
+                task[field] = value;
+            }
+            renderTable();
+            autoSaveLocally(); // Only auto-save to local storage
         }
+    }
 
-        function renderTable() {
-            const tbody = document.getElementById('taskTableBody');
-            tbody.innerHTML = '';
+    function calculateRemaining(estimate, filled) {
+        return Math.max(0, estimate - filled);
+    }
 
-            taskData.forEach((task, index) => {
-                task.jobNumber = index + 1;
-                const remaining = calculateRemaining(task.estimate, task.filled);
-                const progress = calculateProgress(task.estimate, task.filled);
+    function calculateProgress(estimate, filled) {
+        if (estimate === 0) return 0;
+        return Math.min(100, (filled / estimate) * 100);
+    }
 
-                const row = document.createElement('tr');
-                row.innerHTML = `
+    function renderTable() {
+        const tbody = document.getElementById('taskTableBody');
+        tbody.innerHTML = '';
+
+        taskData.forEach((task, index) => {
+            task.jobNumber = index + 1;
+            const remaining = calculateRemaining(task.estimate, task.filled);
+            const progress = calculateProgress(task.estimate, task.filled);
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
                     <td class="job-number">
                         <input type="text" value="${task.jobNumber}" 
                                onchange="updateTask(${task.id}, 'jobNumber', this.value)"
@@ -1108,61 +1151,60 @@
                     </td>
                 `;
 
-                if (task.done) {
-                    row.style.opacity = '0.6';
-                    row.style.background = 'rgba(40, 167, 69, 0.1)';
-                }
-
-                tbody.appendChild(row);
-            });
-        }
-
-        function toggleCalculator() {
-            const box = document.getElementById('calculatorBox');
-            const wasHidden = box.style.display === 'none';
-            box.style.display = wasHidden ? 'block' : 'none';
-            if (wasHidden) {
-                calculateTime();
-                box.scrollIntoView({ behavior: "smooth", block: "center" });
+            if (task.done) {
+                row.style.opacity = '0.6';
+                row.style.background = 'rgba(40, 167, 69, 0.1)';
             }
-        }
 
-        function calculateTime() {
-            const qMaster = +document.getElementById("qtyMaster").value;
-            const qVersion = +document.getElementById("qtyVersion").value;
-            const tMinMaster = +document.getElementById("timeMinMaster").value;
-            const tMinVersion = +document.getElementById("timeMinVersion").value;
-
-            const hrMaster = tMinMaster / 60;
-            const hrVersion = tMinVersion / 60;
-
-            document.getElementById("timeHrMaster").value = hrMaster.toFixed(2);
-            document.getElementById("timeHrVersion").value = hrVersion.toFixed(2);
-
-            const totalMaster = qMaster * tMinMaster;
-            const totalVersion = qVersion * tMinVersion;
-
-            document.getElementById("totalMaster").textContent = totalMaster;
-            document.getElementById("totalVersion").textContent = totalVersion;
-
-            const totalHour = (totalMaster + totalVersion) / 60;
-            const totalDay = totalHour / 8;
-
-            document.getElementById("totalHour").textContent = totalHour.toFixed(2);
-            document.getElementById("totalDay").textContent = totalDay.toFixed(2);
-        }
-
-        // Update when input changes
-        document.addEventListener("input", (e) => {
-            if (
-                ["qtyMaster", "qtyVersion", "timeMinMaster", "timeMinVersion"].includes(
-                    e.target.id
-                )
-            ) {
-                calculateTime();
-            }
+            tbody.appendChild(row);
         });
+    }
 
+    function toggleCalculator() {
+        const box = document.getElementById('calculatorBox');
+        const wasHidden = box.style.display === 'none';
+        box.style.display = wasHidden ? 'block' : 'none';
+        if (wasHidden) {
+            calculateTime();
+            box.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    }
+
+    function calculateTime() {
+        const qMaster = +document.getElementById("qtyMaster").value;
+        const qVersion = +document.getElementById("qtyVersion").value;
+        const tMinMaster = +document.getElementById("timeMinMaster").value;
+        const tMinVersion = +document.getElementById("timeMinVersion").value;
+
+        const hrMaster = tMinMaster / 60;
+        const hrVersion = tMinVersion / 60;
+
+        document.getElementById("timeHrMaster").value = hrMaster.toFixed(2);
+        document.getElementById("timeHrVersion").value = hrVersion.toFixed(2);
+
+        const totalMaster = qMaster * tMinMaster;
+        const totalVersion = qVersion * tMinVersion;
+
+        document.getElementById("totalMaster").textContent = totalMaster;
+        document.getElementById("totalVersion").textContent = totalVersion;
+
+        const totalHour = (totalMaster + totalVersion) / 60;
+        const totalDay = totalHour / 8;
+
+        document.getElementById("totalHour").textContent = totalHour.toFixed(2);
+        document.getElementById("totalDay").textContent = totalDay.toFixed(2);
+    }
+
+    // Update when input changes
+    document.addEventListener("input", (e) => {
+        if (
+            ["qtyMaster", "qtyVersion", "timeMinMaster", "timeMinVersion"].includes(
+                e.target.id
+            )
+        ) {
+            calculateTime();
+        }
+    });
     </script>
 </body>
 
