@@ -965,7 +965,7 @@
 
     function addRow() {
         if (!currentAccount) { alert('Please create an account first!'); return; }
-        taskData.push({ id: taskIdCounter++, jobNumber: taskIdCounter - 1, taskName: '', estimate: 0, filled: 0, done: false });
+        taskData.unshift({ id: taskIdCounter++, jobNumber: taskIdCounter - 1, taskName: '', estimate: 0, filled: 0, done: false });
         renderTable();
         autoSaveLocally();
     }
