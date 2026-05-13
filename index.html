@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Task Management System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #483434;
@@ -527,6 +527,33 @@
             .task-name { min-width: 130px; }
             #calculatorBox { width: 95vw; }
         }
+
+        /* ── SPRING CC BRAND ─────────────────────────────────────── */
+        :root {
+            --bg: #282828;
+            --surface: #1c1916;
+            --panel: #1c1916;
+            --border: rgba(185,185,177,0.2);
+            --border-hi: #FF3700;
+            --text: #E5D2B8;
+            --muted: #B9B9B1;
+            --dim: #555550;
+            --accent: #FF3700;
+            --accent-glow: rgba(255,55,0,0.2);
+            --green: #2DB87D;
+            --green-bg: rgba(45,184,125,0.12);
+            --red: #D03030;
+            --red-bg: rgba(208,48,48,0.10);
+            --amber: #f0a84c;
+            --amber-bg: rgba(240,168,76,0.10);
+        }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #1c1916 0%, #282828 60%, #3d1800 100%);
+            background-attachment: fixed;
+        }
+        .app-logo { color: var(--text); }
+        .app-logo-icon { background: var(--accent); }
     </style>
 </head>
 <body>
