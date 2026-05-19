@@ -8,23 +8,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
     <style>
+        /* ── SPRING CC BRAND TOKENS ──────────────────────────────── */
         :root {
-            --bg: #483434;
-            --surface: #6B4F4F;
-            --panel: #6B4F4F;
-            --border: #483434;
-            --border-hi: #FFF3E4;
-            --text: #FFF3E4;
-            --muted: #FFF3E4;
-            --dim: #6B4F4F;
-            --accent: #483434;
-            --accent-glow: rgba(255, 243, 228, 0.1);
-            --green: #FFF3E4;
-            --green-bg: rgba(255, 243, 228, 0.5);
-            --red: #f05555;
-            --red-bg: rgba(240, 85, 85, 0.10);
+            --bg: #282828;
+            --surface: #1c1916;
+            --panel: #1c1916;
+            --border: rgba(185,185,177,0.2);
+            --border-hi: #FF3700;
+            --text: #E5D2B8;
+            --muted: #B9B9B1;
+            --dim: #3a3733;
+            --accent: #FF3700;
+            --accent-glow: rgba(255,55,0,0.18);
+            --green: #2DB87D;
+            --green-bg: rgba(45,184,125,0.12);
+            --red: #D03030;
+            --red-bg: rgba(208,48,48,0.10);
             --amber: #f0a84c;
-            --amber-bg: rgba(240, 168, 76, 0.10);
+            --amber-bg: rgba(240,168,76,0.10);
             --radius: 6px;
             --radius-lg: 10px;
         }
@@ -32,8 +33,9 @@
         * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
-            font-family: 'Syne', sans-serif;
-            background: var(--bg);
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #1c1916 0%, #282828 60%, #3d1800 100%);
+            background-attachment: fixed;
             color: var(--text);
             min-height: 100vh;
             font-size: 14px;
@@ -66,7 +68,7 @@
             display: flex;
             align-items: center;
             gap: 9px;
-            font-family: 'Syne', sans-serif;
+            font-family: 'DM Sans', sans-serif;
             font-weight: 700;
             font-size: 15px;
             letter-spacing: 0.02em;
@@ -172,7 +174,7 @@
             padding: 7px 14px;
             border-radius: var(--radius);
             cursor: pointer;
-            font-family: 'Syne', sans-serif;
+            font-family: 'DM Sans', sans-serif;
             font-size: 13px;
             font-weight: 600;
             white-space: nowrap;
@@ -190,7 +192,7 @@
             border-color: var(--accent);
             color: #fff;
         }
-        .btn-primary:hover { background: #4a7de0; border-color: #4a7de0; }
+        .btn-primary:hover { background: #cc2b00; border-color: #cc2b00; }
 
         .btn-success {
             background: rgba(61,207,130,0.12);
@@ -464,7 +466,7 @@
         }
         .calc-table input[type="number"]:focus { border-color: var(--accent); }
         .calc-table input[readonly] { color: var(--muted); cursor: default; }
-        .calc-total-row { background: rgba(91,140,238,0.06); }
+        .calc-total-row { background: rgba(255,55,0,0.06); }
         .calc-total-row td { font-weight: 600; color: var(--accent) !important; }
 
         .calc-summary {
@@ -528,32 +530,6 @@
             #calculatorBox { width: 95vw; }
         }
 
-        /* ── SPRING CC BRAND ─────────────────────────────────────── */
-        :root {
-            --bg: #282828;
-            --surface: #1c1916;
-            --panel: #1c1916;
-            --border: rgba(185,185,177,0.2);
-            --border-hi: #FF3700;
-            --text: #E5D2B8;
-            --muted: #B9B9B1;
-            --dim: #555550;
-            --accent: #FF3700;
-            --accent-glow: rgba(255,55,0,0.2);
-            --green: #2DB87D;
-            --green-bg: rgba(45,184,125,0.12);
-            --red: #D03030;
-            --red-bg: rgba(208,48,48,0.10);
-            --amber: #f0a84c;
-            --amber-bg: rgba(240,168,76,0.10);
-        }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: linear-gradient(135deg, #1c1916 0%, #282828 60%, #3d1800 100%);
-            background-attachment: fixed;
-        }
-        .app-logo { color: var(--text); }
-        .app-logo-icon { background: var(--accent); }
     </style>
 </head>
 <body>
